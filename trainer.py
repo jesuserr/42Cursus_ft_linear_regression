@@ -1,16 +1,24 @@
 import sys
 import csv
+import argparse
 import matplotlib.pyplot as plt
 
-# Parse command line arguments in case another dataset file is provided
+# Parse command line arguments (another dataset can be provided)
 def parse_arguments():
-    if len(sys.argv) > 2:
-        raise ValueError("Invalid number of arguments\n" +
-        "usage: python3 trainer.py [dataset_file]\n" +
-        "dataset_file default name: 'data.csv'")
-    elif len(sys.argv) == 2:
-        return sys.argv[1]
-    return 'data.csv'
+    msg = "python3 trainer.py [dataset_file] [-p] [-r]\n"
+    msg += "dataset_file default name: 'data.csv'\n"
+    msg += "[-p]: plot dataset\n"
+    msg += "[-r]: plot linear regression"
+    arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
+    arg_parser.add_argument('dataset_file', type=str, nargs='?', default='data.csv')
+    arg_parser.add_argument("-p", '--plot', action='store_true')
+    arg_parser.add_argument('-r', '--regression', action='store_true')
+    args = arg_parser.parse_args()
+    if any(arg.startswith('-') and len(arg) > 2 for arg in sys.argv[1:]):
+        print("usage: " + msg)
+        print("trainer.py: error: unrecognized arguments")
+        sys.exit(1)
+    return args
 
 # Read dataset from file and convert it to a list of duples of floats
 def read_dataset(dataset_file):
@@ -53,11 +61,10 @@ def plot_regression_line(dataset):
     print(f"y = {slope} * x + {intercept}")
 
 if __name__ == '__main__':
+    args = parse_arguments()
     try:
-        dataset_file = parse_arguments()
-        dataset = read_dataset(dataset_file)
-        print(dataset)
-        plot(dataset)
+        dataset = read_dataset(args.dataset_file)
+        plot(dataset) if args.plot else None
     except ValueError as error:
         print(error)
         sys.exit(1)
