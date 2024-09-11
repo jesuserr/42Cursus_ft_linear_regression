@@ -37,3 +37,94 @@ def gradient_descent_2(m_now, b_now, dataset, L):
 #for i in range(epochs):
 #    m, b = gradient_descent_2(m, b, dataset[1:], L)
 #    print(f"y = {m} * x + {b}")
+
+def mean_squared_error(dataset, m, b):
+    error = 0
+    for point in dataset:
+        x = point[0]
+        y = point[1]
+        error += (y - (m * x + b)) ** 2
+    return (error / len(dataset))
+
+def gradient_descent(m_now, b_now, dataset):
+    L = 0.01
+    m_gradient = 0
+    b_gradient = 0
+    n = float(len(dataset))
+    for i in dataset:
+        x = i[0]
+        y = i[1]
+        m_gradient += -(2/n) * x * (y - (m_now * x + b_now))
+        b_gradient += -(2/n) * (y - (m_now * x + b_now))
+    m = m_now - L * m_gradient
+    b = b_now - L * b_gradient
+    return [m, b]
+
+def init_values(dataset, m, b):    
+    x_max = x_min = dataset[0][0]
+    y_for_x_max = y_for_x_min = dataset[0][1]
+    for point in dataset:
+        if point[0] > x_max:
+            x_max = point[0]
+            y_for_x_max = point[1]
+        if point[0] < x_min:
+            x_min = point[0]
+            y_for_x_min = point[1]
+    m = (y_for_x_max - y_for_x_min) / (x_max - x_min)
+    b = y_for_x_max - m * x_max
+    return m, b
+
+def gradient_descent(dataset):
+    m = b = 0
+    for i in range(EPOCHS):
+        m_gradient = b_gradient = 0
+        for point in dataset:
+            x = point[0]
+            y = point[1]
+            m_gradient += ((m * x + b) - y) * x
+            b_gradient += ((m * x + b) - y)
+        m -= m_gradient * LEARNING_RATE / len(dataset)
+        b -= b_gradient * LEARNING_RATE / len(dataset)
+    return (m, b)
+
+def gradient_descent_2(dataset):
+    m = b = 0
+    i = 0
+    while(True):    
+        m_gradient = b_gradient = 0
+        for point in dataset:
+            x = point[0]
+            y = point[1]
+            m_gradient += ((m * x + b) - y) * x
+            b_gradient += ((m * x + b) - y)
+        previous_m = m
+        previous_b = b
+        m -= m_gradient * LEARNING_RATE / len(dataset)
+        b -= b_gradient * LEARNING_RATE / len(dataset)
+        if previous_m == m or previous_b == b:
+            break
+        i += 1
+        print(f"i: {i} -> m: {m}, b: {b}")
+    return (m, b)
+
+# Normalize dataset to values between 0 and 1 for both x and y
+def normalize_dataset(dataset):
+    norm_dataset = [[point[0], point[1]] for point in dataset]
+    max_x = max(point[0] for point in norm_dataset[1:])
+    min_x = min(point[0] for point in norm_dataset[1:])
+    max_y = max(point[1] for point in norm_dataset[1:])
+    min_y = min(point[1] for point in norm_dataset[1:])
+    for point in norm_dataset[1:]:
+        point[0] = (point[0] - min_x) / (max_x - min_x)
+        point[1] = (point[1] - min_y) / (max_y - min_y)
+    return norm_dataset
+
+# Denormalize thetas to dataset original values
+def denormalize_thetas(dataset, m, b):
+    max_x = max(point[0] for point in dataset)
+    min_x = min(point[0] for point in dataset)
+    max_y = max(point[1] for point in dataset)
+    min_y = min(point[1] for point in dataset)
+    m = m * (max_y - min_y) / (max_x - min_x)
+    b = b * (max_y - min_y) + min_y - m * min_x
+    return (m, b)    
