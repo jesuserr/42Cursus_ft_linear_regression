@@ -128,3 +128,14 @@ def denormalize_thetas(dataset, m, b):
     m = m * (max_y - min_y) / (max_x - min_x)
     b = b * (max_y - min_y) + min_y - m * min_x
     return (m, b)    
+
+# Plot regression line using numpy (testing purposes)
+def plot_regression_line(dataset):
+    import numpy as np
+    x_values = [point[0] for point in dataset[1:]]
+    y_values = [point[1] for point in dataset[1:]]
+    slope, intercept = np.polyfit(x_values, y_values, 1)
+    x_line = np.linspace(min(x_values), max(x_values), 100)
+    y_line = slope * x_line + intercept
+    plt.plot(x_line, y_line, color='blue', label='Regression Line')
+    print(f"y = {slope} * x + {intercept}")

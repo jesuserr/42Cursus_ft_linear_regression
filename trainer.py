@@ -82,13 +82,14 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     min_x = min(point[0] for point in dataset)
     max_y = max(point[1] for point in dataset)
     min_y = min(point[1] for point in dataset)
-    m = m_norm * (max_y - min_y) / (max_x - min_x)
-    b = b_norm * (max_y - min_y) + min_y - m * min_x
+    slope = m_norm * (max_y - min_y) / (max_x - min_x)
+    intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
     print(f"{GREEN}OK{DEF}", flush=True)
-    write_json_data(m, b)
+    write_json_data(slope, intercept)
+    return (slope, intercept)
 
-def write_json_data(m, b):    
-    data = {"slope": m, "intercept": b, "theta1": m, "theta0": b}
+def write_json_data(slope, intercept):
+    data = {"theta1": slope, "theta0": intercept}
     filename = args.dataset_file.split('.')[0]
     print(f"Exporting thetas to '{filename}.json'... ", end="", flush=True)
     try:
@@ -98,17 +99,14 @@ def write_json_data(m, b):
             raise ValueError(f"Error: {e}")
     print(f"{GREEN}OK{DEF}", flush=True)
 
-
 if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
-        gradient_descent(norm_dataset[1:], dataset[1:])
-        plot(dataset) if args.plot else None
-        plot(norm_dataset) if args.normalized else None
+        slope, intercept = gradient_descent(norm_dataset[1:], dataset[1:])
+        plot(dataset, slope, intercept, args.regression) if args.plot else None
     except ValueError as error:
         print(error)
         sys.exit(1)
 
-    #TODO: plot linear regression
     #TODO: plot cost function
