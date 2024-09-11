@@ -1,6 +1,7 @@
 import sys
 import csv
 import argparse
+import time
 from plot import plot
 
 LEARNING_RATE = 0.001
@@ -51,8 +52,10 @@ def read_dataset(dataset_file):
     except OSError as e:
         raise ValueError(f"Error: {e}")
 
-# TIMEOUT needed
-def gradient_descent(norm_dataset, dataset):
+# Calculates linear regression using gradient descent on normalized
+# dataset and returns denormalized slope 'm' and intercept 'b'
+def gradient_descent(norm_dataset, dataset, timeout = 30):
+    timeout_start_time = time.time()
     m_norm = b_norm = 0
     while(True):
         m_gradient = b_gradient = 0
@@ -65,8 +68,10 @@ def gradient_descent(norm_dataset, dataset):
         previous_b = b_norm
         m_norm -= m_gradient * LEARNING_RATE / len(norm_dataset)
         b_norm -= b_gradient * LEARNING_RATE / len(norm_dataset)
-        if previous_m == m_norm and previous_b == b_norm:
+        if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) < 1e-20:
             break
+        if (time.time() - timeout_start_time) > timeout:
+            raise ValueError(f"Error: Maximum calculation time exceeded")
     max_x = max(point[0] for point in dataset)
     min_x = min(point[0] for point in dataset)
     max_y = max(point[1] for point in dataset)
@@ -79,12 +84,15 @@ if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
-        #plot(dataset) if args.plot else None
-        #plot(norm_dataset) if args.normalized else None
+        plot(dataset) if args.plot else None
+        plot(norm_dataset) if args.normalized else None
         m, b = gradient_descent(norm_dataset[1:], dataset[1:])
         print(f"y = {m} * x + {b}")
-        #gradient_descent(dataset[1:])
-        #print(dataset)
     except ValueError as error:
         print(error)
         sys.exit(1)
+
+    #TODO: plot linear regression
+    #TODO: plot cost function
+    #json
+       
