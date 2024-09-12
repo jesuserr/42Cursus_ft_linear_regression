@@ -11,7 +11,7 @@ DEF = '\033[0m'
 
 # Parse command line arguments (another dataset can be provided)
 def parse_arguments():
-    msg = "python3 trainer.py [dataset_file.csv] [-p] [-r] [-a]\n"
+    msg = "python3 trainer.py [dataset_file.csv] [-p] [-n] [-r] [-a]\n"
     msg += "dataset_file default name: 'data.csv'\n"
     msg += "[-p]: plot original dataset\n"
     msg += "[-n]: plot normalized dataset\n"
@@ -21,8 +21,8 @@ def parse_arguments():
     arg_parser.add_argument('dataset_file', type=str, nargs='?', default='data.csv')
     arg_parser.add_argument("-p", '--plot', action='store_true')
     arg_parser.add_argument("-n", '--normalized', action='store_true')
-    arg_parser.add_argument("-a", '--accuracy', action='store_true')
     arg_parser.add_argument('-r', '--regression', action='store_true')
+    arg_parser.add_argument("-a", '--accuracy', action='store_true')
     args = arg_parser.parse_args()
     if any(arg.startswith('-') and len(arg) > 2 for arg in sys.argv[1:]):
         print("usage: " + msg)
@@ -34,7 +34,7 @@ def parse_arguments():
 # first list 'dataset' contains the original values and second list
 # 'norm_dataset' contains the normalized values between 0 and 1
 def read_dataset(dataset_file):
-    print(f"Parsing data... ", end="", flush=True)
+    print(f"Parsing data... ", end="")
     try:
         with open(dataset_file, 'r') as file:
             reader = csv.reader(file)
@@ -54,7 +54,7 @@ def read_dataset(dataset_file):
         for point in norm_dataset[1:]:
             point[0] = (point[0] - min_x) / (max_x - min_x)
             point[1] = (point[1] - min_y) / (max_y - min_y)
-        print(f"{GREEN}OK{DEF}", flush=True)
+        print(f"{GREEN}OK{DEF}")
         return dataset, norm_dataset
     except OSError as e:
         raise ValueError(f"Error: {e}")
@@ -62,55 +62,56 @@ def read_dataset(dataset_file):
 # Calculates linear regression using gradient descent on normalized
 # dataset and returns denormalized slope 'm' and intercept 'b'
 def gradient_descent(norm_dataset, dataset, timeout = 30):
-    print(f"Calculating linear regression... ", end="", flush=True)
+    print(f"Calculating linear regression... ", end="")
     timeout_start_time = time.time()
     m_norm = b_norm = 0
     while(True):
         m_gradient = b_gradient = 0
-        for point in norm_dataset:
+        for point in norm_dataset[1:]:
             x = point[0]
             y = point[1]
             m_gradient += ((m_norm * x + b_norm) - y) * x
             b_gradient += ((m_norm * x + b_norm) - y)
         previous_m = m_norm
         previous_b = b_norm
-        m_norm -= m_gradient * LEARNING_RATE / len(norm_dataset)
-        b_norm -= b_gradient * LEARNING_RATE / len(norm_dataset)
+        m_norm -= m_gradient * LEARNING_RATE / len(norm_dataset[1:])
+        b_norm -= b_gradient * LEARNING_RATE / len(norm_dataset[1:])
         if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) < 1e-20:
             break
         if (time.time() - timeout_start_time) > timeout:
             raise ValueError(f"Error: Maximum calculation time exceeded")
-    max_x = max(point[0] for point in dataset)
-    min_x = min(point[0] for point in dataset)
-    max_y = max(point[1] for point in dataset)
-    min_y = min(point[1] for point in dataset)
+    max_x = max(point[0] for point in dataset[1:])
+    min_x = min(point[0] for point in dataset[1:])
+    max_y = max(point[1] for point in dataset[1:])
+    min_y = min(point[1] for point in dataset[1:])
     slope = m_norm * (max_y - min_y) / (max_x - min_x)
     intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
-    print(f"{GREEN}OK\ttheta0 = {intercept:.5f}\ttheta1 = {slope:.5f}\t{DEF}", flush=True)
+    print(f"{GREEN}OK\ttheta0 = {intercept:.5f}\ttheta1 = {slope:.5f}\t{DEF}")
+    if args.normalized:
+        plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
     return (slope, intercept)
 
 # Export thetas to a .json file
 def write_json_data(slope, intercept):
     data = {"theta1": slope, "theta0": intercept}
     filename = args.dataset_file.split('.')[0]
-    print(f"Exporting thetas to '{filename}.json'... ", end="", flush=True)
+    print(f"Exporting thetas to '{filename}.json'... ", end="")
     try:
         with open(f"{filename}.json", 'w') as file:
             json.dump(data, file)
     except OSError as e:
             raise ValueError(f"Error: {e}")
-    print(f"{GREEN}OK{DEF}", flush=True)
+    print(f"{GREEN}OK{DEF}")
 
 if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
-        slope, intercept = gradient_descent(norm_dataset[1:], dataset[1:])
+        slope, intercept = gradient_descent(norm_dataset, dataset)
         write_json_data(slope, intercept)
         model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
-        plot(dataset, slope, intercept, args.regression) if args.plot else None
+        if args.plot:
+            plot(dataset, slope, intercept, args.regression, norm_set = False)
     except ValueError as error:
         print(error)
         sys.exit(1)
-
-#TODO: plot cost function

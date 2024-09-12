@@ -4,7 +4,7 @@ GREEN = '\033[92m'
 DEF = '\033[0m'
 
 # Plot dataset points
-def plot(dataset, slope, intercept, regression):
+def plot(dataset, slope, intercept, regression, norm_set):
     # For better experience in 42
     # plt.rcParams['font.size'] = 16
     # plt.figure(num='Linear Regression', figsize=(10.24, 7.68))
@@ -13,7 +13,10 @@ def plot(dataset, slope, intercept, regression):
         plt.scatter(point[0], point[1], color='red')
     plt.xlabel(dataset[0][0])
     plt.ylabel(dataset[0][1])
-    plt.title(f'{dataset[0][1]} = f({dataset[0][0]})')
+    if norm_set:
+        plt.title(f'{dataset[0][1]} = f({dataset[0][0]})\n[Normalized Values]')
+    else:
+        plt.title(f'{dataset[0][1]} = f({dataset[0][0]})\n[Original Values]')
     plt.grid(True)
     plot_line(dataset[1:], slope, intercept) if regression else None
     plt.show()
