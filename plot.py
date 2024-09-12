@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 
 # Plot dataset points
 def plot(dataset, slope, intercept, regression):
+    # For better experience in 42
+    # plt.rcParams['font.size'] = 16
+    # plt.figure(num='Linear Regression', figsize=(10.24, 7.68))
     plt.figure(num='Linear Regression')
     for point in dataset[1:]:
         plt.scatter(point[0], point[1], color='red')
@@ -19,5 +22,5 @@ def plot_line(dataset, slope, intercept):
     y1 = slope * x1 + intercept
     y2 = slope * x2 + intercept
     plt.plot([x1, x2], [y1, y2], color='blue', \
-        label=f"y = {slope:{".8f"}} * x + {intercept:{".8f"}}")
+        label=f"y = {slope:.8f} * x + {intercept:.8f}")
     plt.legend()
