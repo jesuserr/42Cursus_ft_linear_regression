@@ -139,3 +139,16 @@ def plot_regression_line(dataset):
     y_line = slope * x_line + intercept
     plt.plot(x_line, y_line, color='blue', label='Regression Line')
     print(f"y = {slope} * x + {intercept}")
+
+def calculate_model_rmse(dataset, slope, intercept):
+    print(f"Calculating RMSE... ", end="", flush=True)
+    error = 0
+    for point in dataset[1:]:
+        x = point[0]
+        y = point[1]
+        error += (y - (slope * x + intercept)) ** 2
+    rmse = (error / len(dataset)) ** 0.5
+    print(f"{GREEN}OK{DEF}", flush=True)
+    print(rmse)
+
+print(f"{GREEN}OK\t\t R² = {r_squared:.4f}\t RMSE = {rmse:.4f}\t MAE = {mae:.4f}{DEF}", flush=True)

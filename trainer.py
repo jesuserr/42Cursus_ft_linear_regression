@@ -11,15 +11,17 @@ DEF = '\033[0m'
 
 # Parse command line arguments (another dataset can be provided)
 def parse_arguments():
-    msg = "python3 trainer.py [dataset_file] [-p] [-r]\n"
+    msg = "python3 trainer.py [dataset_file.csv] [-p] [-r] [-a]\n"
     msg += "dataset_file default name: 'data.csv'\n"
     msg += "[-p]: plot original dataset\n"
     msg += "[-n]: plot normalized dataset\n"
-    msg += "[-r]: plot linear regression"
+    msg += "[-r]: plot linear regression\n"
+    msg += "[-a]: show model accuracy"
     arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
     arg_parser.add_argument('dataset_file', type=str, nargs='?', default='data.csv')
     arg_parser.add_argument("-p", '--plot', action='store_true')
     arg_parser.add_argument("-n", '--normalized', action='store_true')
+    arg_parser.add_argument("-a", '--accuracy', action='store_true')
     arg_parser.add_argument('-r', '--regression', action='store_true')
     args = arg_parser.parse_args()
     if any(arg.startswith('-') and len(arg) > 2 for arg in sys.argv[1:]):
@@ -60,7 +62,7 @@ def read_dataset(dataset_file):
 # Calculates linear regression using gradient descent on normalized
 # dataset and returns denormalized slope 'm' and intercept 'b'
 def gradient_descent(norm_dataset, dataset, timeout = 30):
-    print(f"Calculating Linear Regression... ", end="", flush=True)
+    print(f"Calculating linear regression... ", end="", flush=True)
     timeout_start_time = time.time()
     m_norm = b_norm = 0
     while(True):
@@ -88,6 +90,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     write_json_data(slope, intercept)
     return (slope, intercept)
 
+# Export thetas to a .json file
 def write_json_data(slope, intercept):
     data = {"theta1": slope, "theta0": intercept}
     filename = args.dataset_file.split('.')[0]
@@ -99,14 +102,34 @@ def write_json_data(slope, intercept):
             raise ValueError(f"Error: {e}")
     print(f"{GREEN}OK{DEF}", flush=True)
 
+# Calculates three metrics to have an overall picture of the model accuracy
+# R²: Coefficient of determination, RMSE: Root Mean Squared Error and
+# MAE: Mean Absolute Error
+def model_metrics(dataset, slope, intercept):
+    print(f"Calculating model metrics... ", end="", flush=True)
+    y_mean = sum(point[1] for point in dataset) / len(dataset)
+    residual_sum_of_squares = total_sum_of_squares = abs_error = 0
+    for point in dataset:
+        x = point[0]
+        y = point[1]
+        residual_sum_of_squares += (y - (slope * x + intercept)) ** 2
+        total_sum_of_squares += (y - y_mean) ** 2
+        abs_error += abs(y - (slope * x + intercept))
+    r_squared = 1 - (residual_sum_of_squares / total_sum_of_squares)
+    rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
+    mae = abs_error / len(dataset)
+    print(f"{GREEN}OK\t\t R² = {r_squared:.4f}\t RMSE = {rmse:.4f}\t", end="")
+    print(f"MAE = {mae:.4f}{DEF}", flush=True)
+
 if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
         slope, intercept = gradient_descent(norm_dataset[1:], dataset[1:])
+        model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
         plot(dataset, slope, intercept, args.regression) if args.plot else None
     except ValueError as error:
         print(error)
         sys.exit(1)
 
-    #TODO: plot cost function
+#TODO: plot cost function
