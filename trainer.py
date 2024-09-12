@@ -3,7 +3,7 @@ import csv
 import argparse
 import time
 import json
-from plot import plot
+from bonus import plot, model_metrics
 
 LEARNING_RATE = 0.001
 GREEN = '\033[92m'
@@ -86,8 +86,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     min_y = min(point[1] for point in dataset)
     slope = m_norm * (max_y - min_y) / (max_x - min_x)
     intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
-    print(f"{GREEN}OK{DEF}", flush=True)
-    write_json_data(slope, intercept)
+    print(f"{GREEN}OK\ttheta0 = {intercept:.5f}\ttheta1 = {slope:.5f}\t{DEF}", flush=True)
     return (slope, intercept)
 
 # Export thetas to a .json file
@@ -102,30 +101,12 @@ def write_json_data(slope, intercept):
             raise ValueError(f"Error: {e}")
     print(f"{GREEN}OK{DEF}", flush=True)
 
-# Calculates three metrics to have an overall picture of the model accuracy
-# R²: Coefficient of determination, RMSE: Root Mean Squared Error and
-# MAE: Mean Absolute Error
-def model_metrics(dataset, slope, intercept):
-    print(f"Calculating model metrics... ", end="", flush=True)
-    y_mean = sum(point[1] for point in dataset) / len(dataset)
-    residual_sum_of_squares = total_sum_of_squares = abs_error = 0
-    for point in dataset:
-        x = point[0]
-        y = point[1]
-        residual_sum_of_squares += (y - (slope * x + intercept)) ** 2
-        total_sum_of_squares += (y - y_mean) ** 2
-        abs_error += abs(y - (slope * x + intercept))
-    r_squared = 1 - (residual_sum_of_squares / total_sum_of_squares)
-    rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
-    mae = abs_error / len(dataset)
-    print(f"{GREEN}OK\t\t R² = {r_squared:.4f}\t RMSE = {rmse:.4f}\t", end="")
-    print(f"MAE = {mae:.4f}{DEF}", flush=True)
-
 if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
         slope, intercept = gradient_descent(norm_dataset[1:], dataset[1:])
+        write_json_data(slope, intercept)
         model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
         plot(dataset, slope, intercept, args.regression) if args.plot else None
     except ValueError as error:
