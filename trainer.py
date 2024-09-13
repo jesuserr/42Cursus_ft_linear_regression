@@ -55,11 +55,14 @@ def read_dataset(dataset_file):
         min_y = min(point[1] for point in norm_dataset[1:])
         if (max_x - min_x) == 0 and (max_y - min_y) == 0:
             raise ValueError("All points in dataset are identical")
-        if (max_x - min_x) == 0 or (max_y - min_y) == 0:
-            raise ValueError("All points in dataset are already aligned")
-        for point in norm_dataset[1:]:
-            point[0] = (point[0] - min_x) / (max_x - min_x)
-            point[1] = (point[1] - min_y) / (max_y - min_y)
+        if (max_x - min_x) == 0:            
+            raise ValueError("Impossible regression, all x points are identical")
+        if (max_y - min_y) == 0:
+            norm_dataset = []
+        else:                
+            for point in norm_dataset[1:]:
+                point[0] = (point[0] - min_x) / (max_x - min_x)
+                point[1] = (point[1] - min_y) / (max_y - min_y)
         print(f"{GREEN}OK{DEF}")
         return dataset, norm_dataset
     except (OSError, ValueError) as e:
@@ -101,7 +104,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
 
 # Export thetas to a .json file
 def write_json_data(slope, intercept):
-    data = {"theta1": slope, "theta0": intercept}
+    data = {"theta0": intercept, "theta1": slope}
     filename = args.dataset_file.split('.')[0]
     print(f"Exporting thetas to '{filename}.json'... ", end="")
     try:
@@ -115,7 +118,12 @@ if __name__ == '__main__':
     args = parse_arguments()
     try:
         dataset, norm_dataset = read_dataset(args.dataset_file)
-        slope, intercept = gradient_descent(norm_dataset, dataset)
+        if not norm_dataset:
+            slope, intercept = 0, dataset[1][1]
+            print(f"Calculating linear regression... {GREEN}OK\t", end="")
+            print(f"theta0 = {intercept:.5f}\ttheta1 = {slope:.5f}{DEF}")
+        else:
+            slope, intercept = gradient_descent(norm_dataset, dataset)
         write_json_data(slope, intercept)
         model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
         if args.plot:

@@ -5,7 +5,7 @@ DEF = '\033[0m'
 
 # Plot dataset points
 def plot(dataset, slope, intercept, regression, norm_set):
-    # For better experience in 42
+    # For better experience in 42 School's Macs
     # plt.rcParams['font.size'] = 16
     # plt.figure(num='Linear Regression', figsize=(10.24, 7.68))
     plt.figure(num='Linear Regression')
@@ -35,7 +35,11 @@ def plot_line(dataset, slope, intercept):
 # R²: Coefficient of determination, RMSE: Root Mean Squared Error and
 # MAE: Mean Absolute Error
 def model_metrics(dataset, slope, intercept):
-    print(f"Calculating model metrics... ", end="", flush=True)
+    print(f"Calculating model metrics... ", end="")
+    if slope == 0:
+        print(f"{GREEN}OK\t\tR² = N/A\t\tRMSE = 0.0000\t\t", end="")
+        print(f"MAE = 0.0000{DEF}")
+        return
     y_mean = sum(point[1] for point in dataset) / len(dataset)
     residual_sum_of_squares = total_sum_of_squares = abs_error = 0
     for point in dataset:
@@ -48,4 +52,4 @@ def model_metrics(dataset, slope, intercept):
     rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
     mae = abs_error / len(dataset)
     print(f"{GREEN}OK\t\tR² = {r_squared:.4f}\t\tRMSE = {rmse:.4f}\t\t", end="")
-    print(f"MAE = {mae:.4f}{DEF}", flush=True)
+    print(f"MAE = {mae:.4f}{DEF}")
