@@ -46,17 +46,23 @@ def read_dataset(dataset_file):
                     dataset.append([row[0], row[1]])
                 else:
                     dataset.append([float(row[0]), float(row[1])])
+        if len(dataset) < 3:
+            raise ValueError("Dataset must contain at least two points")
         norm_dataset = [[point[0], point[1]] for point in dataset]
         max_x = max(point[0] for point in norm_dataset[1:])
         min_x = min(point[0] for point in norm_dataset[1:])
         max_y = max(point[1] for point in norm_dataset[1:])
         min_y = min(point[1] for point in norm_dataset[1:])
+        if (max_x - min_x) == 0 and (max_y - min_y) == 0:
+            raise ValueError("All points in dataset are identical")
+        if (max_x - min_x) == 0 or (max_y - min_y) == 0:
+            raise ValueError("All points in dataset are already aligned")
         for point in norm_dataset[1:]:
             point[0] = (point[0] - min_x) / (max_x - min_x)
             point[1] = (point[1] - min_y) / (max_y - min_y)
         print(f"{GREEN}OK{DEF}")
         return dataset, norm_dataset
-    except OSError as e:
+    except (OSError, ValueError) as e:
         raise ValueError(f"Error: {e}")
 
 # Calculates linear regression using gradient descent on normalized
