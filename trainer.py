@@ -5,6 +5,7 @@ import time
 import json
 from bonus import plot, model_metrics
 
+# Constants for color codes and learning rate
 LEARNING_RATE = 0.001
 GREEN = '\033[92m'
 DEF = '\033[0m'

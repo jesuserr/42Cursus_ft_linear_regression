@@ -152,3 +152,5 @@ def calculate_model_rmse(dataset, slope, intercept):
     print(rmse)
 
 print(f"{GREEN}OK\t\t R² = {r_squared:.4f}\t RMSE = {rmse:.4f}\t MAE = {mae:.4f}{DEF}", flush=True)
+RED = '\033[91m'
+print(f"{RED}KO\t{DEF}", end="")
