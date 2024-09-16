@@ -132,3 +132,6 @@ if __name__ == '__main__':
     except ValueError as error:
         print(error)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nProgram interrupted by user")
+        sys.exit(0)

@@ -1,6 +1,8 @@
 import sys
 import argparse
 import json
+from trainer import read_dataset
+from bonus import predictor_plot
 
 # Constants for color codes
 GREEN = '\033[92m'
@@ -12,7 +14,7 @@ DEF = '\033[0m'
 def parse_arguments():
     msg = "python3 predictor.py [thetas_file.json] [-p]\n"
     msg += "thetas_file default name: 'data.json'\n"
-    msg += "[-p]: plot point into original dataset\n"
+    msg += "[-p]: plot estimated value over linear regression\n"
     arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
     arg_parser.add_argument('thetas_file', type=str, nargs='?', default='data.json')
     arg_parser.add_argument("-p", '--plot', action='store_true')
@@ -69,6 +71,7 @@ def calculate_price(theta0, theta1):
     price = theta0 + theta1 * mileage
     print(f"Estimated price for a car with a mileage of ", end="")
     print(f"{BLUE}{mileage:.2f}{DEF} km = {BLUE}{price:.2f}{DEF} Euros")
+    return mileage
 
 # Calculate and print y for a given x (subject bonus part)
 def calculate_custom(theta0, theta1, labels):
@@ -85,15 +88,24 @@ def calculate_custom(theta0, theta1, labels):
     y = theta0 + theta1 * x
     print(f"Estimated value of [{labels[1]}] for {BLUE}{x:.2f}{DEF}", end="")
     print(f" [{labels[0]}] = {BLUE}{y:.2f}{DEF} [{labels[1]}]")
+    return x
 
 if __name__ == '__main__':
     args = parse_arguments()
     try:
         theta0, theta1, labels = read_thetas(args.thetas_file)
         if labels[0] == 'km' and labels[1] == 'price':
-            calculate_price(theta0, theta1)
+            input_value = calculate_price(theta0, theta1)
         else:
-            calculate_custom(theta0, theta1, labels)
+            input_value = calculate_custom(theta0, theta1, labels)
+        if args.plot and theta0 != 0 and theta1 != 0:
+            filename = f"{args.thetas_file.split('.')[0]}.csv"
+            dataset, norm_dataset = read_dataset(filename)
+            estimation = theta0 + theta1 * input_value
+            predictor_plot(dataset, theta1, theta0, input_value, estimation)
     except ValueError as error:
         print(error)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nProgram interrupted by user")
+        sys.exit(0)
