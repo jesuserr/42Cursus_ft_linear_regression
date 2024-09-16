@@ -103,9 +103,9 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
         plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
     return (slope, intercept)
 
-# Export thetas to a .json file
-def write_json_data(slope, intercept):
-    data = {"theta0": intercept, "theta1": slope}
+# Export thetas and labels to a .json file
+def write_json_data(labels, slope, intercept):
+    data = {"theta0": intercept, "theta1": slope, "labels": labels}
     filename = args.dataset_file.split('.')[0]
     print(f"Exporting thetas to '{filename}.json'... ", end="")
     try:
@@ -125,7 +125,7 @@ if __name__ == '__main__':
             print(f"theta0 = {intercept:.5f}\ttheta1 = {slope:.5f}{DEF}")
         else:
             slope, intercept = gradient_descent(norm_dataset, dataset)
-        write_json_data(slope, intercept)
+        write_json_data(dataset[0], slope, intercept)
         model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
         if args.plot:
             plot(dataset, slope, intercept, args.regression, norm_set = False)
