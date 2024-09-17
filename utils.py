@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 
 GREEN = '\033[92m'
+BLUE = '\033[94m'
+RED = '\033[91m'
 DEF = '\033[0m'
 
 # Plot dataset points and regression line (trainer program)

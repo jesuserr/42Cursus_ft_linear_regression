@@ -2,13 +2,7 @@ import sys
 import argparse
 import json
 from trainer import read_dataset
-from bonus import predictor_plot
-
-# Constants for color codes
-GREEN = '\033[92m'
-BLUE = '\033[94m'
-RED = '\033[91m'
-DEF = '\033[0m'
+from utils import predictor_plot, GREEN, BLUE, RED, DEF
 
 # Parse command line arguments (any thetas file name can be provided)
 # Default thetas file name is 'data.json'

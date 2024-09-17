@@ -3,12 +3,10 @@ import csv
 import argparse
 import time
 import json
-from bonus import plot, model_metrics
+from utils import plot, model_metrics, GREEN, DEF
 
-# Constants for color codes and learning rate
+# Constant for learning rate
 LEARNING_RATE = 0.001
-GREEN = '\033[92m'
-DEF = '\033[0m'
 
 # Parse command line arguments (another dataset can be provided)
 def parse_arguments():
