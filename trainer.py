@@ -19,7 +19,8 @@ def parse_arguments():
     msg += "[-r]: plot linear regression\n"
     msg += "[-a]: show model accuracy"
     arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
-    arg_parser.add_argument('dataset_file', type=str, nargs='?', default='data.csv')
+    arg_parser.add_argument('dataset_file', type=str, nargs='?', \
+        default='data.csv')
     arg_parser.add_argument("-p", '--plot', action='store_true')
     arg_parser.add_argument("-n", '--normalized', action='store_true')
     arg_parser.add_argument('-r', '--regression', action='store_true')
@@ -57,7 +58,7 @@ def read_dataset(dataset_file):
         if (max_x - min_x) == 0 and (max_y - min_y) == 0:
             raise ValueError("All points in dataset are identical")
         if (max_x - min_x) == 0:            
-            raise ValueError("Impossible regression, all x points are identical")
+            raise ValueError("Impossible regression, all 'x' are identical")
         if (max_y - min_y) == 0:
             norm_dataset = []
         else:                
@@ -87,7 +88,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
         previous_b = b_norm
         m_norm -= m_gradient * LEARNING_RATE / len(norm_dataset[1:])
         b_norm -= b_gradient * LEARNING_RATE / len(norm_dataset[1:])
-        if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) < 1e-20:
+        if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) <1e-20:
             break
         if (time.time() - timeout_start_time) > timeout:
             raise ValueError(f"Error: Maximum calculation time exceeded")
@@ -98,7 +99,8 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     slope = m_norm * (max_y - min_y) / (max_x - min_x)
     intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
     print(f"\r{' ' * 40}\rCalculating linear regression... {GREEN}OK\t", end="")
-    print(f"iterations = {i}\ttheta0 = {intercept:.5f}\ttheta1 = {slope:.5f}{DEF}")
+    print(f"iterations = {i:,}\ttheta0 = {intercept:,.5f}\ttheta1 = ", end="")
+    print(f"{slope:,.5f}{DEF}")
     if args.normalized:
         plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
     return (slope, intercept)
@@ -122,7 +124,7 @@ if __name__ == '__main__':
         if not norm_dataset:
             slope, intercept = 0, dataset[1][1]
             print(f"Calculating linear regression... {GREEN}OK\t", end="")
-            print(f"theta0 = {intercept:.5f}\ttheta1 = {slope:.5f}{DEF}")
+            print(f"theta0 = {intercept:,.5f}\ttheta1 = {slope:,.5f}{DEF}")
         else:
             slope, intercept = gradient_descent(norm_dataset, dataset)
         write_json_data(dataset[0], slope, intercept)

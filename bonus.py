@@ -69,5 +69,5 @@ def model_metrics(dataset, slope, intercept):
     r_squared = 1 - (residual_sum_of_squares / total_sum_of_squares)
     rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
     mae = abs_error / len(dataset)
-    print(f"{GREEN}OK\t\tR² = {r_squared:.4f}\t\tRMSE = {rmse:.4f}\t\t", end="")
-    print(f"MAE = {mae:.4f}{DEF}")
+    print(f"{GREEN}OK\t\tR² = {r_squared:.4f}\t\tRMSE = {rmse:,.4f}", end="")
+    print(f"\t\tMAE = {mae:,.4f}{DEF}")

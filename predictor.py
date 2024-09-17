@@ -7,6 +7,7 @@ from bonus import predictor_plot
 # Constants for color codes
 GREEN = '\033[92m'
 BLUE = '\033[94m'
+RED = '\033[91m'
 DEF = '\033[0m'
 
 # Parse command line arguments (any thetas file name can be provided)
@@ -16,7 +17,8 @@ def parse_arguments():
     msg += "thetas_file default name: 'data.json'\n"
     msg += "[-p]: plot estimated value over linear regression\n"
     arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
-    arg_parser.add_argument('thetas_file', type=str, nargs='?', default='data.json')
+    arg_parser.add_argument('thetas_file', type=str, nargs='?', \
+        default='data.json')
     arg_parser.add_argument("-p", '--plot', action='store_true')
     args = arg_parser.parse_args()
     if any(arg.startswith('-') and len(arg) > 2 for arg in sys.argv[1:]):
@@ -43,8 +45,8 @@ def read_thetas(thetas_file):
             labels = [str(label) for label in labels]
     except OSError as e:
         if e.errno == 2:
-            print(f"\n'{thetas_file}' not found, setting default values", end="")
-            print(f"{GREEN}\ttheta0 = 0\t\ttheta1 = 0{DEF}")
+            print(f"\n'{thetas_file}' {RED}not found{DEF}, setting ", end="")
+            print(f"default values {GREEN}\ttheta0 = 0\t\ttheta1 = 0{DEF}")
             return 0, 0, ["km","price"]
         else:
             raise ValueError(f"Error: {e}")
@@ -53,7 +55,7 @@ def read_thetas(thetas_file):
     except ValueError as e:
         raise ValueError(f"Error: {e}")
     print(f"{GREEN}OK\t", end="")
-    print(f"\ttheta0 = {theta0:.5f}\ttheta1 = {theta1:.5f}{DEF}")
+    print(f"\ttheta0 = {theta0:,.5f}\ttheta1 = {theta1:,.5f}{DEF}")
     return theta0, theta1, labels
 
 # Calculate and print car price for a given mileage (subject mandatory part)
@@ -70,7 +72,7 @@ def calculate_price(theta0, theta1):
             sys.exit(0)
     price = theta0 + theta1 * mileage
     print(f"Estimated price for a car with a mileage of ", end="")
-    print(f"{BLUE}{mileage:.2f}{DEF} km = {BLUE}{price:.2f}{DEF} Euros")
+    print(f"{BLUE}{mileage:,.2f}{DEF} km = {BLUE}{price:,.2f}{DEF} Euros")
     return mileage
 
 # Calculate and print y for a given x (subject bonus part)
@@ -86,8 +88,8 @@ def calculate_custom(theta0, theta1, labels):
             print("\nProgram interrupted by user")
             sys.exit(0)
     y = theta0 + theta1 * x
-    print(f"Estimated value of [{labels[1]}] for {BLUE}{x:.2f}{DEF}", end="")
-    print(f" [{labels[0]}] = {BLUE}{y:.2f}{DEF} [{labels[1]}]")
+    print(f"Estimated value of [{labels[1]}] for {BLUE}{x:,.2f}{DEF}", end="")
+    print(f" [{labels[0]}] = {BLUE}{y:,.2f}{DEF} [{labels[1]}]")
     return x
 
 if __name__ == '__main__':
