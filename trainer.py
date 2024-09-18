@@ -3,7 +3,7 @@ import csv
 import argparse
 import time
 import json
-from utils import plot, model_metrics, GREEN, BLUE, DEF
+from utils import plot, model_metrics, GREEN, BLUE, RED, DEF
 
 # Constant for learning rate
 LEARNING_RATE = 0.005
@@ -34,7 +34,7 @@ def parse_arguments():
 # first list 'dataset' contains the original values and second list
 # 'norm_dataset' contains the normalized values between 0 and 1
 def read_dataset(dataset_file):
-    print(f"Parsing data... ", end="")
+    print(f"Parsing data... {RED}", end="")
     try:
         with open(dataset_file, 'r') as file:
             reader = csv.reader(file)
@@ -70,7 +70,7 @@ def read_dataset(dataset_file):
 
 # Calculates linear regression using gradient descent on normalized
 # dataset and returns de-normalized slope 'm' and intercept 'b'
-def gradient_descent(norm_dataset, dataset, timeout = 30):
+def gradient_descent(norm_dataset, dataset, timeout = 10):
     timeout_start_time = time.time()
     m_norm = b_norm = i = 0
     while(True):
@@ -89,7 +89,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
         if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) <1e-20:
             break
         if (time.time() - timeout_start_time) > timeout:
-            raise ValueError(f"Error: Maximum calculation time exceeded")
+            raise ValueError(f"{RED} Error: Maximum calculation time exceeded")
     max_x = max(point[0] for point in dataset[1:])
     min_x = min(point[0] for point in dataset[1:])
     max_y = max(point[1] for point in dataset[1:])
@@ -107,7 +107,7 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
 def write_json_data(labels, slope, intercept):
     data = {"theta0": intercept, "theta1": slope, "labels": labels}
     filename = args.dataset_file.split('.')[0]
-    print(f"Exporting thetas to '{filename}.json'... ", end="")
+    print(f"Exporting thetas to '{filename}.json'... {RED}", end="")
     try:
         with open(f"{filename}.json", 'w') as file:
             json.dump(data, file)

@@ -23,7 +23,7 @@ def parse_arguments():
 
 # Read thetas and labels from .json and return them
 def read_thetas(thetas_file):
-    print(f"Reading thetas from '{thetas_file}'... ", end="")
+    print(f"Reading thetas from '{thetas_file}'... {RED}", end="")
     try:
         with open(thetas_file, 'r') as file:
             values = json.load(file)
