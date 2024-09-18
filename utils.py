@@ -51,9 +51,10 @@ def plot_line(dataset, slope, intercept):
         label=f"y = {slope:.8f} * x + {intercept:.8f}")
     plt.legend()
 
-# Calculates four metrics to have an overall view of the model accuracy
-# R²: Coefficient of determination, RMSE: Root Mean Squared Error,
-# MAE: Mean Absolute Error, RSE: Residual Standard Error
+# Calculates five metrics to have an overall view of the model accuracy
+# R: Correlation Coefficient, R²: Coefficient of determination,
+# RMSE: Root Mean Squared Error, MAE: Mean Absolute Error and
+# RSE: Residual Standard Error
 def model_metrics(dataset, slope, intercept):
     print(f"Calculating model metrics... ", end="")
     if slope == 0:
@@ -71,5 +72,10 @@ def model_metrics(dataset, slope, intercept):
     rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
     mae = abs_error / len(dataset)
     rse = (residual_sum_of_squares / (len(dataset) - 2)) ** 0.5
-    print(f"{GREEN}OK{BLUE}\nR² = {r_squared:.4f}\nRMSE = {rmse:,.4f}")
-    print(f"MAE = {mae:,.4f}\nRSE = {rse:,.4f}{DEF}")
+    r = (r_squared ** 0.5) * (1 if slope > 0 else -1)
+    print(f"{GREEN}OK{BLUE}")
+    print(f"Correlation Coefficient (R) = {r:.4f}")
+    print(f"Coefficient of Determination (R²) = {r_squared:.4f}")
+    print(f"Root Mean Squared Error (RMSE) = {rmse:,.4f}")
+    print(f"Mean Absolute Error (MAE) = {mae:,.4f}")
+    print(f"Residual Standard Error (RSE) = {rse:,.4f}{DEF}")    
