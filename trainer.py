@@ -69,7 +69,7 @@ def read_dataset(dataset_file):
         raise ValueError(f"Error: {e}")
 
 # Calculates linear regression using gradient descent on normalized
-# dataset and returns denormalized slope 'm' and intercept 'b'
+# dataset and returns de-normalized slope 'm' and intercept 'b'
 def gradient_descent(norm_dataset, dataset, timeout = 30):
     timeout_start_time = time.time()
     m_norm = b_norm = i = 0
@@ -97,8 +97,8 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     slope = m_norm * (max_y - min_y) / (max_x - min_x)
     intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
     print(f"\r{' ' * 40}\rCalculating linear regression... {GREEN}OK\t", end="")
-    print(f"iterations = {i:,}\ttheta0 = {intercept:,.5f}\ttheta1 = ", end="")
-    print(f"{slope:,.5f}{DEF}")
+    print(f"iterations = {i:,}\tlearning rate = {LEARNING_RATE}\t", end="")
+    print(f"theta0 = {intercept:,.5f}\ttheta1 = {slope:,.5f}{DEF}")
     if args.normalized:
         plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
     return (slope, intercept)
