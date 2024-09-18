@@ -57,8 +57,7 @@ def plot_line(dataset, slope, intercept):
 def model_metrics(dataset, slope, intercept):
     print(f"Calculating model metrics... ", end="")
     if slope == 0:
-        print(f"{GREEN}OK\t\tR² = N/A\t\tRMSE = 0.0000\t\t", end="")
-        print(f"MAE = 0.0000{DEF}")
+        print(f"{GREEN}OK{BLUE}\nR² = N/A\nRMSE = 0\nMAE = 0\nRSE = 0{DEF}")
         return
     y_mean = sum(point[1] for point in dataset) / len(dataset)
     residual_sum_of_squares = total_sum_of_squares = abs_error = 0
@@ -72,5 +71,5 @@ def model_metrics(dataset, slope, intercept):
     rmse = (residual_sum_of_squares / len(dataset)) ** 0.5
     mae = abs_error / len(dataset)
     rse = (residual_sum_of_squares / (len(dataset) - 2)) ** 0.5
-    print(f"{GREEN}OK\t\tR² = {r_squared:.4f}\t\tRMSE = {rmse:,.4f}", end="")
-    print(f"\t\tMAE = {mae:,.4f}\t\tRSE = {rse:,.4f}{DEF}")
+    print(f"{GREEN}OK{BLUE}\nR² = {r_squared:.4f}\nRMSE = {rmse:,.4f}")
+    print(f"MAE = {mae:,.4f}\nRSE = {rse:,.4f}{DEF}")

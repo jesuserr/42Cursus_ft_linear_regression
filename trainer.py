@@ -3,10 +3,10 @@ import csv
 import argparse
 import time
 import json
-from utils import plot, model_metrics, GREEN, DEF
+from utils import plot, model_metrics, GREEN, BLUE, DEF
 
 # Constant for learning rate
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.005
 
 # Parse command line arguments (another dataset can be provided)
 def parse_arguments():
@@ -96,9 +96,9 @@ def gradient_descent(norm_dataset, dataset, timeout = 30):
     min_y = min(point[1] for point in dataset[1:])
     slope = m_norm * (max_y - min_y) / (max_x - min_x)
     intercept = b_norm * (max_y - min_y) + min_y - slope * min_x
-    print(f"\r{' ' * 40}\rCalculating linear regression... {GREEN}OK\t", end="")
-    print(f"iterations = {i:,}\tlearning rate = {LEARNING_RATE}\t", end="")
-    print(f"theta0 = {intercept:,.5f}\ttheta1 = {slope:,.5f}{DEF}")
+    print(f"\r{' ' * 40}\rCalculating linear regression... {GREEN}OK")
+    print(f"{BLUE}iterations = {i:,}\nlearning rate = {LEARNING_RATE}")
+    print(f"theta0 = {intercept:,.5f}\ntheta1 = {slope:,.5f}{DEF}")
     if args.normalized:
         plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
     return (slope, intercept)
@@ -121,8 +121,9 @@ if __name__ == '__main__':
         dataset, norm_dataset = read_dataset(args.dataset_file)
         if not norm_dataset:
             slope, intercept = 0, dataset[1][1]
-            print(f"Calculating linear regression... {GREEN}OK\t", end="")
-            print(f"theta0 = {intercept:,.5f}\ttheta1 = {slope:,.5f}{DEF}")
+            print(f"Calculating linear regression... {GREEN}OK{BLUE}")
+            print(f"iterations = 0\nlearning rate = N/A")
+            print(f"theta0 = {intercept:,.5f}\ntheta1 = {slope}{DEF}")
         else:
             slope, intercept = gradient_descent(norm_dataset, dataset)
         write_json_data(dataset[0], slope, intercept)

@@ -40,7 +40,7 @@ def read_thetas(thetas_file):
     except OSError as e:
         if e.errno == 2:
             print(f"\n'{thetas_file}' {RED}not found{DEF}, setting ", end="")
-            print(f"default values {GREEN}\ttheta0 = 0\t\ttheta1 = 0{DEF}")
+            print(f"default values {BLUE}\ntheta0 = 0\ntheta1 = 0{DEF}")
             return 0, 0, ["km","price"]
         else:
             raise ValueError(f"Error: {e}")
@@ -48,8 +48,8 @@ def read_thetas(thetas_file):
         raise ValueError(f"Error: Invalid JSON format")
     except ValueError as e:
         raise ValueError(f"Error: {e}")
-    print(f"{GREEN}OK\t", end="")
-    print(f"\ttheta0 = {theta0:,.5f}\ttheta1 = {theta1:,.5f}{DEF}")
+    print(f"{GREEN}OK{BLUE}")
+    print(f"theta0 = {theta0:,.5f}\ntheta1 = {theta1:,.5f}{DEF}")
     return theta0, theta1, labels
 
 # Calculate and print car price for a given mileage (subject mandatory part)
