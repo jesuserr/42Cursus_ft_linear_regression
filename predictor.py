@@ -41,6 +41,7 @@ def read_thetas(thetas_file):
         if e.errno == 2:
             print(f"\n'{thetas_file}' {RED}not found{DEF}, setting ", end="")
             print(f"default values {BLUE}\ntheta0 = 0\ntheta1 = 0{DEF}")
+            args.plot = False
             return 0, 0, ["km","price"]
         else:
             raise ValueError(f"Error: {e}")
@@ -94,7 +95,7 @@ if __name__ == '__main__':
             input_value = calculate_price(theta0, theta1)
         else:
             input_value = calculate_custom(theta0, theta1, labels)
-        if args.plot and theta0 != 0 and theta1 != 0:
+        if args.plot:
             filename = f"{args.thetas_file.split('.')[0]}.csv"
             dataset, norm_dataset = read_dataset(filename)
             estimation = theta0 + theta1 * input_value
