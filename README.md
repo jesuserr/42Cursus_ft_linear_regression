@@ -49,10 +49,33 @@ Additional datasets (for testing) are available in the `datasets/` directory. Bo
 ## Concepts
 
 ### Gradient Descent
-Gradient Descent is an optimization algorithm used to minimize the cost function. It tweaks its parameters incrementally to find the parameters (weights, `theta0` and `theta1`) that minimize the error in predicting outputs.
+Gradient descent is an iterative optimization algorithm used to find the minimum value of a **cost function**. A cost function captures the amount of "displeasure" a specific hypothesis causes us, i.e. how far off its predictions are from the actual values. For a linear regression, this cost function is the **Mean Squared Error (MSE)**:
+
+```
+cost(theta0, theta1) = (1 / m) * Σ (estimatePrice(mileage[i]) - price[i])²
+```
+
+where `estimatePrice(mileage) = theta0 + theta1 * mileage` is the hypothesis, and `m` is the number of data points in the dataset.
+
+Gradient descent minimizes this cost by repeatedly nudging `theta0` and `theta1` in the direction that reduces the error the most (the negative gradient of the cost function), scaled by the `learning rate`:
+
+```
+tmp_theta0 = learning_rate * (1 / m) * Σ (estimatePrice(mileage[i]) - price[i])
+tmp_theta1 = learning_rate * (1 / m) * Σ (estimatePrice(mileage[i]) - price[i]) * mileage[i]
+```
+
+Both `theta0` and `theta1` are then updated **simultaneously** from these temporary values, and the process repeats, getting `theta0` and `theta1` closer and closer to the values that minimize the cost function, until the change between iterations becomes negligible (convergence) or the algorithm times out.
 
 ### Normalization
 The data needs to be normalized before applying the gradient descent given the gap between `km` magnitudes and `price` magnitudes. This prevents overflow issues and drastically improves the speed and convergence of the gradient descent.
+
+### Learning Rate
+The learning rate controls how big a step the gradient descent takes towards the minimum of the cost function on each iteration. A value too small makes the algorithm converge slowly (or hit the timeout before finishing), while a value too large can make it overshoot the minimum and fail to converge at all.
+
+It is set through the `LEARNING_RATE` constant at the top of [`trainer.py`](trainer.py), defaulting to `0.005`. To experiment with it, simply edit that constant and re-run the trainer:
+```python
+LEARNING_RATE = 0.005
+```
 
 ## Accuracy Metrics
 
@@ -83,7 +106,7 @@ Both programs include comprehensive error handling to ensure smooth execution an
 
 ## Requirements
 - Python 3.10+
-- The `matplotlib` library for plotting elements (not mandatory but required if plot flags are used).
+- The `matplotlib` library, used for plotting elements. It is required to run either program, even without the plot flags, since both import from `utils.py`, which loads `matplotlib.pyplot` at the top level.
 
 ### Setup
 ```bash
@@ -96,19 +119,10 @@ sudo apt update
 sudo apt install -y python3 python3-pip python3-matplotlib
 ```
 
-To start:
-```bash
-python3 trainer.py data.csv -p -n -r -a
-```
-Then predicting:
-```bash
-python3 predictor.py
-```
-
 ## Example
 
 ```bash
-$ python3 trainer.py      
+$ python3 trainer.py -p -r -a      
 Parsing data... OK
 Calculating linear regression... OK     
 iterations = 114,931
@@ -116,12 +130,27 @@ learning rate = 0.005
 theta0 = 8,499.59965
 theta1 = -0.02145
 Exporting thetas to 'data.json'... OK
+Calculating model metrics... OK
+Correlation Coefficient (R) = -0.8561
+Coefficient of Determination (R²) = 0.7330
+Root Mean Squared Error (RMSE) = 667.5667
+Mean Absolute Error (MAE) = 557.8384
+Residual Standard Error (RSE) = 697.2506
 ```
+
+The `-p -r` flags also generate the following plot, showing the dataset along with the calculated linear regression line:
+
+![Linear regression plot](assets/linear_regression_plot.png)
+
 ```bash
-$ python3 predictor.py 
+$ python3 predictor.py -p
 Reading thetas from 'data.json'... OK
 theta0 = 8,499.59965
 theta1 = -0.02145
 Please enter car mileage: 100000
 Estimated price for a car with a mileage of 100,000.00 km = 6,354.70 Euros
 ```
+
+The `-p` flag also generates the following plot, showing the estimated value over the linear regression line:
+
+![Predictor plot](assets/predictor_plot.png)
