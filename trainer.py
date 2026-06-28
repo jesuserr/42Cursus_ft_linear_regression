@@ -1,12 +1,16 @@
 import sys
+import os
 import csv
 import argparse
 import time
 import json
 from utils import plot, model_metrics, GREEN, BLUE, RED, DEF
 
+
 # Constant for learning rate
 LEARNING_RATE = 0.005
+TIMEOUT = 10
+
 
 # Parse command line arguments (another dataset can be provided)
 def parse_arguments():
@@ -17,8 +21,8 @@ def parse_arguments():
     msg += "[-r]: plot linear regression\n"
     msg += "[-a]: show model accuracy"
     arg_parser = argparse.ArgumentParser(add_help=False, usage=msg)
-    arg_parser.add_argument('dataset_file', type=str, nargs='?', \
-        default='data.csv')
+    arg_parser.add_argument('dataset_file', type=str, nargs='?',
+                            default='data.csv')
     arg_parser.add_argument("-p", '--plot', action='store_true')
     arg_parser.add_argument("-n", '--normalized', action='store_true')
     arg_parser.add_argument('-r', '--regression', action='store_true')
@@ -29,6 +33,7 @@ def parse_arguments():
         print("trainer.py: error: unrecognized arguments")
         sys.exit(1)
     return args
+
 
 # Read dataset from .csv file and creates two lists of duples of floats,
 # first list 'dataset' contains the original values and second list
@@ -55,11 +60,11 @@ def read_dataset(dataset_file):
         min_y = min(point[1] for point in norm_dataset[1:])
         if (max_x - min_x) == 0 and (max_y - min_y) == 0:
             raise ValueError("All points in dataset are identical")
-        if (max_x - min_x) == 0:            
+        if (max_x - min_x) == 0:
             raise ValueError("Impossible regression, all 'x' are identical")
         if (max_y - min_y) == 0:
             norm_dataset = []
-        else:                
+        else:
             for point in norm_dataset[1:]:
                 point[0] = (point[0] - min_x) / (max_x - min_x)
                 point[1] = (point[1] - min_y) / (max_y - min_y)
@@ -68,28 +73,34 @@ def read_dataset(dataset_file):
     except (OSError, ValueError) as e:
         raise ValueError(f"Error: {e}")
 
+
 # Calculates linear regression using gradient descent on normalized
 # dataset and returns de-normalized slope 'm' and intercept 'b'
-def gradient_descent(norm_dataset, dataset, timeout = 10):
+def gradient_descent(norm_dataset, dataset, args, timeout=TIMEOUT):
     timeout_start_time = time.time()
     m_norm = b_norm = i = 0
-    while(True):
+    data_points = norm_dataset[1:]
+    len_norm_dataset = len(data_points)
+    while (True):
         i += 1
-        print(f"\rCalculating linear regression... {i}", end="")
+        if i % 1000 == 0:
+            print(f"\rCalculating linear regression... {i}", end="")
         m_gradient = b_gradient = 0
-        for point in norm_dataset[1:]:
+        for point in data_points:
             x = point[0]
             y = point[1]
             m_gradient += ((m_norm * x + b_norm) - y) * x
             b_gradient += ((m_norm * x + b_norm) - y)
         previous_m = m_norm
         previous_b = b_norm
-        m_norm -= m_gradient * LEARNING_RATE / len(norm_dataset[1:])
-        b_norm -= b_gradient * LEARNING_RATE / len(norm_dataset[1:])
-        if abs(previous_m - m_norm) < 1e-20 and abs(previous_b - b_norm) <1e-20:
+        m_norm -= m_gradient * LEARNING_RATE / len_norm_dataset
+        b_norm -= b_gradient * LEARNING_RATE / len_norm_dataset
+        if abs(previous_m - m_norm) < 1e-20 and \
+                abs(previous_b - b_norm) < 1e-20:
             break
-        if (time.time() - timeout_start_time) > timeout:
-            raise ValueError(f"{RED} Error: Maximum calculation time exceeded")
+        if i % 1000 == 0 and (time.time() - timeout_start_time) > timeout:
+            raise ValueError(f"{RED}\nError: Maximum calculation time"
+                             f" exceeded{DEF}")
     max_x = max(point[0] for point in dataset[1:])
     min_x = min(point[0] for point in dataset[1:])
     max_y = max(point[1] for point in dataset[1:])
@@ -100,20 +111,22 @@ def gradient_descent(norm_dataset, dataset, timeout = 10):
     print(f"{BLUE}iterations = {i:,}\nlearning rate = {LEARNING_RATE}")
     print(f"theta0 = {intercept:,.5f}\ntheta1 = {slope:,.5f}{DEF}")
     if args.normalized:
-        plot(norm_dataset, m_norm, b_norm, args.regression, norm_set = True)
+        plot(norm_dataset, m_norm, b_norm, args.regression, norm_set=True)
     return (slope, intercept)
 
+
 # Export thetas and labels to a .json file
-def write_json_data(labels, slope, intercept):
+def write_json_data(labels, slope, intercept, args):
     data = {"theta0": intercept, "theta1": slope, "labels": labels}
-    filename = args.dataset_file.split('.')[0]
+    filename = os.path.splitext(args.dataset_file)[0]
     print(f"Exporting thetas to '{filename}.json'... {RED}", end="")
     try:
         with open(f"{filename}.json", 'w') as file:
             json.dump(data, file)
     except OSError as e:
-            raise ValueError(f"Error: {e}")
+        raise ValueError(f"Error: {e}")
     print(f"{GREEN}OK{DEF}")
+
 
 if __name__ == '__main__':
     args = parse_arguments()
@@ -122,16 +135,17 @@ if __name__ == '__main__':
         if not norm_dataset:
             slope, intercept = 0, dataset[1][1]
             print(f"Calculating linear regression... {GREEN}OK{BLUE}")
-            print(f"iterations = 0\nlearning rate = N/A")
+            print("iterations = 0\nlearning rate = N/A")
             print(f"theta0 = {intercept:,.5f}\ntheta1 = {slope}{DEF}")
         else:
-            slope, intercept = gradient_descent(norm_dataset, dataset)
-        write_json_data(dataset[0], slope, intercept)
-        model_metrics(dataset[1:], slope, intercept) if args.accuracy else None
+            slope, intercept = gradient_descent(norm_dataset, dataset, args)
+        write_json_data(dataset[0], slope, intercept, args)
+        if args.accuracy:
+            model_metrics(dataset[1:], slope, intercept)
         if args.plot:
-            plot(dataset, slope, intercept, args.regression, norm_set = False)
+            plot(dataset, slope, intercept, args.regression, norm_set=False)
     except ValueError as error:
-        print(error)
+        print(f"{error}{DEF}")
         sys.exit(1)
     except KeyboardInterrupt:
         print("\nProgram interrupted by user")

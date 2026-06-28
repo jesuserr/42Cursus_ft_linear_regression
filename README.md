@@ -99,10 +99,36 @@ Both programs include comprehensive error handling to ensure smooth execution an
 - **Arguments**: Detects and reports unrecognized command-line arguments.
 
 ### `predictor.py`
-- **Model File**: Validates JSON formatting and ensures required keys (`theta0`, `theta1`, `labels`) are present.
+- **Model File**: Validates JSON formatting, ensures required keys (`theta0`, `theta1`, `labels`) are present, checks that thetas are numeric types, and verifies that `labels` is a list of exactly two elements.
 - **Missing Model**: If the specified weights file (e.g., `data.json`) is not found, the program safely defaults both thetas to `0` instead of crashing.
 - **User Input**: Rejects non-numeric inputs during the interactive prompt and gracefully exits upon user interrupt (`Ctrl+C` or `Ctrl+D`).
 - **Arguments**: Detects and reports unrecognized command-line arguments.
+
+## Code Style
+
+The codebase is [PEP8](https://peps.python.org/pep-0008/) compliant and passes [flake8](https://flake8.pycqa.org/) with no warnings on all three files.
+
+### Running flake8
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install flake8
+flake8 predictor.py trainer.py utils.py
+deactivate
+```
+
+### What was changed to achieve compliance
+- Normalized spacing to exactly 2 blank lines between top-level function definitions
+- Replaced backslash line continuations (`\`) with parentheses for implicit multi-line expressions (in `argparse` calls, `plt.scatter`, `plt.plot`)
+- Fixed spacing around keyword arguments: `timeout = 10` → `timeout=10`, `norm_set = False` → `norm_set=False`
+- Fixed whitespace in `while(True):` → `while (True):` (PEP8 requires a space before the parenthesis in control-flow statements)
+- Fixed over-indented `raise` statement inside `write_json_data` (was indented one level too deep)
+- Removed trailing whitespace on several lines
+- Removed unnecessary `f""` string prefixes on literals with no placeholders (e.g., `f"Error: Invalid JSON format"` → `"Error: Invalid JSON format"`)
+- Added missing space after comma in list literal: `["km","price"]` → `["km", "price"]`
+- Added missing trailing newlines at end of all three files
+- Wrapped one long convergence-check line (exceeding 79 characters) using a backslash continuation
 
 ## Requirements
 - Python 3.10+
